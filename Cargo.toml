@@ -1,0 +1,19 @@
+[package]
+name = "advent_of_code_2022"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name= "day01"
+test = false
+bench = false
+path="day01/src/main.rs"
+
+
+[workspace]
+
+members = [
+    "day01",
+]
+
+[dependencies]
