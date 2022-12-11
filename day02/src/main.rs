@@ -10,8 +10,16 @@ fn main() {
     let mut total_score = 0;
     for line in io::BufReader::new(file).lines() {
         let line = line.unwrap();
-        let (a_move, b_move) = line.split_at(2);
-        let (a_move, b_move) = (HandShape::new(a_move.trim()), HandShape::new(b_move.trim()));
+        let (a_move, exp_res) = line.split_at(2);
+        let exp_res = match exp_res.trim() {
+            "X" => GameResult::PlayerAVictory,
+            "Y" => GameResult::Draw,
+            "Z" => GameResult::PlayerBVictory,
+            _ => panic!("unexpected letter"),
+        };
+
+        let a_move = HandShape::new(a_move.trim());
+        let b_move = next_move(a_move, exp_res);
 
         let result = play(a_move, b_move);
         let res_score = match result {
@@ -27,6 +35,16 @@ fn main() {
         total_score += res_score + move_score;
     }
     println!("{}", total_score);
+}
+
+fn next_move(a_move: HandShape, exp_res: GameResult) -> HandShape {
+    if exp_res == GameResult::Draw {
+        return a_move;
+    }
+    if exp_res == GameResult::PlayerAVictory {
+        return a_move.beats();
+    }
+    return a_move.lose_with();
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
@@ -45,8 +63,25 @@ impl HandShape {
             _ => panic!("unexpected letter: {}", letter),
         }
     }
+
+    fn beats(&self) -> Self {
+        match self {
+            Self::Rock => Self::Scissors,
+            Self::Paper => Self::Rock,
+            Self::Scissors => Self::Paper,
+        }
+    }
+
+    fn lose_with(&self) -> Self {
+        match self {
+            Self::Rock => Self::Paper,
+            Self::Paper => Self::Scissors,
+            Self::Scissors => Self::Rock,
+        }
+    }
 }
 
+#[derive(PartialEq)]
 enum GameResult {
     PlayerAVictory,
     PlayerBVictory,
