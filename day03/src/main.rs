@@ -8,37 +8,41 @@ fn main() {
     let filename = &args[1];
     let file = File::open(filename).expect("open failed");
 
-    let mut total: u32 = 0;
-    for line in io::BufReader::new(file).lines() {
-        let line = line.unwrap();
-        let (first_comp, second_comp) = line.split_at(line.len() / 2);
+    let mut total = 0;
+    let mut lines = io::BufReader::new(file).lines();
+    loop {
+        let l1 = match lines.next() {
+            None => break,
+            Some(v) => v.unwrap(),
+        };
+        let l2 = lines.next().unwrap().unwrap();
+        let l3 = lines.next().unwrap().unwrap();
 
-        let first_comp_ct = occurrence(first_comp);
-        let second_comp_ct = occurrence(second_comp);
-
-        for item in first_comp_ct.iter() {
-            if second_comp_ct.contains(item) {
-                total += *item as u32;
-                // println!("{} for {}", number_to_char(*item), item);
+        let (o1, o2, o3) = (occurrence(&l1), occurrence(&l2), occurrence(&l3));
+        for ch in o1.iter() {
+            if o2.contains(ch) && o3.contains(ch) {
+                total += *ch as u32;
             }
         }
     }
-
     println!("total is {}", total);
 }
 
 fn occurrence(compartment: &str) -> HashSet<u8> {
     let mut ct = HashSet::new();
     for ch in compartment.chars() {
-        let ch_as_int = ch as u8;
-
-        match ch_as_int {
-            d if d > 96 && d < 123 => ct.insert(ch_as_int - 96),
-            d if d > 64 && d < 91 => ct.insert(ch_as_int - 38),
-            _ => panic!("unexpected input"),
-        };
+        ct.insert(ch_as_u8(ch));
     }
     ct
+}
+
+fn ch_as_u8(ch: char) -> u8 {
+    let ch = ch as u8;
+    match ch {
+        d if d > 96 && d < 123 => d - 96,
+        d if d > 64 && d < 91 => d - 38,
+        _ => panic!("unexpected input"),
+    }
 }
 
 fn number_to_char(n: u8) -> char {
