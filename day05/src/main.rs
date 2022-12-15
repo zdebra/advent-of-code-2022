@@ -57,9 +57,13 @@ fn main() {
         let from = caps.get(2).unwrap().as_str().parse::<usize>().unwrap();
         let to = caps.get(3).unwrap().as_str().parse::<usize>().unwrap();
 
+        let mut crates = vec![];
         for _ in 0..cnt {
             let tmp_crate = &stacks[from - 1].pop().unwrap();
-            stacks[to - 1].push(*tmp_crate);
+            crates.insert(0, *tmp_crate);
+        }
+        for c in crates {
+            stacks[to - 1].push(c);
         }
     }
 
