@@ -4,6 +4,9 @@ use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
 
+const TOTAL_FS_AVAILABLE: usize = 70000000;
+const REQUIRED_FS: usize = 30000000;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
@@ -52,14 +55,20 @@ fn main() {
         };
     }
 
-    let mut total = 0;
-    for (_dir, size) in dirs {
-        // println!("{} {}", dir, size);
-        if size <= 100000 {
-            total += size;
+    let total_used_space = dirs.get(&"/".to_owned()).unwrap();
+    let available_space = TOTAL_FS_AVAILABLE - total_used_space;
+    let to_free_up_space = REQUIRED_FS - available_space;
+    println!("total used space = {}", total_used_space);
+    println!("available space = {}", available_space);
+    println!("to free up space = {}", to_free_up_space);
+
+    let mut smallest = usize::MAX;
+    for (_, &size) in &dirs {
+        if size >= to_free_up_space && size < smallest {
+            smallest = size;
         }
     }
-    println!("{total}");
+    println!("{}", smallest);
 }
 
 struct Status {
@@ -73,7 +82,9 @@ impl Status {
         Self {
             cur_dir: "/".to_string(),
             mode: Mode::ReadClose,
-            items: vec![],
+            items: vec![Item::Directory {
+                name: "/".to_string(),
+            }],
         }
     }
 
