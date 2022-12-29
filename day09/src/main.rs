@@ -11,6 +11,7 @@ fn main() {
 
     let (mut tail, mut head) = (Point::new(), Point::new());
     let mut visited = HashSet::new();
+    visited.insert((0, 0));
     for line in io::BufReader::new(file).lines() {
         let line = line.unwrap();
         let (direction, cnt) = line
@@ -27,21 +28,13 @@ fn main() {
             }
 
             if head_tail_positions_check(&head, &tail) {
-                println!("Direction: {}", direction);
-                print_field(&head, &tail, 6);
-                visited.insert((tail.x, tail.y));
                 continue;
             }
 
             adjust_tail(&head, &mut tail);
             visited.insert((tail.x, tail.y));
-
-            println!("Direction: {}", direction);
-            print_field(&head, &tail, 6);
         }
     }
-
-    print_visited(&visited, 6);
 
     println!("visited: {}", visited.len());
 }
@@ -130,7 +123,7 @@ fn head_tail_positions_check(head: &Point, tail: &Point) -> bool {
     true
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 struct Point {
     x: isize,
     y: isize,
