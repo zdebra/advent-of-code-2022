@@ -9,7 +9,7 @@ fn main() {
     let filename = &args[1];
     let file = File::open(filename).expect("open failed");
 
-    let (mut tail, mut head) = (Point::new(), Point::new());
+    let mut points = vec![Point::new(); 10];
     let mut visited = HashSet::new();
     visited.insert((0, 0));
     for line in io::BufReader::new(file).lines() {
@@ -19,6 +19,7 @@ fn main() {
             .expect("expected 2 strings separated by a space");
         let cnt: usize = cnt.parse().expect("cnt supposed to be a number");
         for _ in 0..cnt {
+            let head = &mut points[0];
             match direction {
                 "U" => head.up(),
                 "R" => head.right(),
@@ -26,13 +27,18 @@ fn main() {
                 "L" => head.left(),
                 _ => panic!("unexpected direction {}", direction),
             }
+            for i in 0..9 {
+                let head = points[i].clone();
+                let tail = &mut points[i + 1];
+                if head_tail_positions_check(&head, tail) {
+                    continue;
+                }
 
-            if head_tail_positions_check(&head, &tail) {
-                continue;
+                adjust_tail(&head, tail);
+                if i == 8 {
+                    visited.insert((tail.x, tail.y));
+                }
             }
-
-            adjust_tail(&head, &mut tail);
-            visited.insert((tail.x, tail.y));
         }
     }
 
