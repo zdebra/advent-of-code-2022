@@ -30,7 +30,6 @@ enum Instruction {
 }
 
 struct Device {
-    // x: isize,
     x_before: isize,
     x_after: isize,
     stack: VecDeque<Box<dyn Fn(isize) -> isize>>,
@@ -40,7 +39,6 @@ struct Device {
 impl Device {
     fn new() -> Self {
         Self {
-            // x: 1,
             x_before: 1,
             x_after: 1,
             stack: VecDeque::new(),
@@ -72,21 +70,22 @@ impl Device {
     }
 
     fn run(&mut self) {
-        let mut sum = 0;
-        while self.advance_cycle().is_ok() {
-            match self.cur_cycle {
-                20 | 60 | 100 | 140 | 180 | 220 => {
-                    let strength = self.cur_cycle as isize * self.x_before;
-                    sum += strength;
-                    println!(
-                        "{}: {}|{}; {}",
-                        self.cur_cycle, self.x_before, self.x_after, strength
-                    )
-                }
-                _ => (),
+        loop {
+            let sprite = vec![self.x_after - 1, self.x_after, self.x_after + 1];
+            let mut to_print = if sprite.contains(&((self.cur_cycle % 40) as isize)) {
+                "#".to_string()
+            } else {
+                ".".to_string()
+            };
+
+            if self.cur_cycle % 40 == 39 {
+                to_print += "\n";
             }
+
+            if self.advance_cycle().is_err() {
+                break;
+            }
+            print!("{to_print}");
         }
-        println!("total cycles: {}", self.cur_cycle);
-        println!("total sum: {}", sum);
     }
 }
